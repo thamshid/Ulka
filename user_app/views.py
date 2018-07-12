@@ -91,6 +91,7 @@ class LogInView(View):
 
 
 class UserListView(AdminCheckMixin, View):
+    login_url = '/'
     template_name = 'user_list.html'
 
     def get(self, request, *args, **kwargs):
