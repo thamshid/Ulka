@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ulka-SignUp</title>
+</head>
+<body>
+<form action="/sign-up" method="post">
+    {{ form }}
+    {% csrf_token %}
+    <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+    <input type="submit" value="SignUp" />
+    <div>{{ errors }}</div>
+    <div>
+        <a href="login">Login</a>
+    </div>
+
+</form>
+</body>
+</html>

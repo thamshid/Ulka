@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ulka-Users</title>
+</head>
+<body>
+<div>
+    <a href="/logout">Logout</a>
+</div>
+<table>
+    <thead>
+    <th>Name</th>
+    <th>Email</th>
+    </thead>
+    <tbody>
+    {% for user in users %}
+        <tr>
+            <td>
+                {{ user.name }}
+            </td>
+            <td>
+                <a href="user-info/{{ user.id }}">{{ user.email }}</a>
+            </td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+
+</body>
+</html>
