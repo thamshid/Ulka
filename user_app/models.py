@@ -28,6 +28,8 @@ class AuthUserManager(BaseUserManager):
         Overridden create_superuser method
         """
         user = self.create_user(email=email, password=password)
+        email = Email.objects.create(email=email)
+        user.primary_email = email
         user.is_active = True
         user.is_superuser = True
         user.is_staff = True
