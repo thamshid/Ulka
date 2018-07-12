@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ulka</title>
+</head>
+<body>
+<div><a href="/logout">Logout</a></div>
+<div>User: {{ user.email }}</div>
+{% for file in user.uploads_set.all %}
+    <div><a href="/file-info/{{ file.id }}"><img src="{{ file.file.url }}" width="50px"> </a>
+        {% for commend in file.commend_set.all %}
+            <div>Admin: {{ commend.comment }}</div>
+            {% if commend.reply %}
+                <div>Reply: {{ commend.reply }}</div>
+            {% endif %}
+
+
+        {% endfor %}
+        <form action="/commend/{{ file.id }}" method="post">
+            {{ commend_form }}
+            {% csrf_token %}
+            <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl"
+                   disabled="">
+            <input type="submit" value="Commend"/></form>
+    </div>
+{% endfor %}
+</body>
+</html>

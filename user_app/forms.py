@@ -12,6 +12,13 @@ class LogInForm(forms.Form):
     password = forms.CharField(widget=forms.PasswordInput(), label='Password')
 
 
-
 class UploadForm(forms.Form):
     file = forms.FileField()
+
+
+class ReplyForm(forms.Form):
+    reply = forms.CharField()
+
+
+class CommendForm(forms.Form):
+    commend = forms.CharField()

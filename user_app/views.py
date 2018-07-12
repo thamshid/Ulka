@@ -10,8 +10,8 @@ from django.utils.timezone import now
 from django.views import View
 
 from ulka.custom_mixin import AdminCheckMixin, NormalUserCheckMixin
-from user_app.forms import SignUpForm, LogInForm, UploadForm
-from user_app.models import User, Uploads
+from user_app.forms import SignUpForm, LogInForm, UploadForm, ReplyForm, CommendForm
+from user_app.models import User, Uploads, Commend
 
 
 class HomeView(LoginRequiredMixin, View):
@@ -111,6 +111,15 @@ class UserListView(AdminCheckMixin, View):
         return render(request, self.template_name, {'users': users})
 
 
+class UserInfoView(AdminCheckMixin, View):
+    login_url = '/'
+    template_name = 'user_info.html'
+
+    def get(self, request, *args, **kwargs):
+        user = User.objects.get(id=kwargs['pk'])
+        return render(request, self.template_name, {'user': user, 'commend_form': CommendForm})
+
+
 class DashboardView(NormalUserCheckMixin, View):
     login_url = '/'
     template_name = 'dashboard.html'
@@ -118,7 +127,8 @@ class DashboardView(NormalUserCheckMixin, View):
 
     def get(self, request, *args, **kwargs):
         files = Uploads.objects.filter(user=request.user)
-        return render(request, self.template_name, {'user': request.user, 'form': self.form_class, 'files': files})
+        return render(request, self.template_name,
+                      {'user': request.user, 'form': self.form_class, 'files': files, 'reply_form': ReplyForm})
 
 
 class UploadView(NormalUserCheckMixin, View):
@@ -129,3 +139,26 @@ class UploadView(NormalUserCheckMixin, View):
         if form.is_valid():
             Uploads.objects.create(user=request.user, file=form.files['file'])
         return HttpResponseRedirect('/dashboard')
+
+
+class ReplyView(NormalUserCheckMixin, View):
+    form_class = ReplyForm
+
+    def post(self, request, *args, **kwargs):
+        commend = Commend.objects.get(id=kwargs['pk'])
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            commend.reply = form.data['reply']
+            commend.save()
+        return HttpResponseRedirect('/dashboard')
+
+
+class CommendView(AdminCheckMixin, View):
+    form_class = CommendForm
+
+    def post(self, request, *args, **kwargs):
+        upload = Uploads.objects.get(id=kwargs['pk'])
+        form = self.form_class(request.POST)
+        if form.is_valid():
+            Commend.objects.create(comment=form.data['commend'], upload=upload)
+        return HttpResponseRedirect('/user-info/' + str(upload.user.id))

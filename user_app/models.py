@@ -67,4 +67,11 @@ class Uploads(models.Model):
     user = models.ForeignKey(User)
     file = models.FileField()
 
+class Commend(models.Model):
+    upload = models.ForeignKey(Uploads)
+    comment = models.CharField(max_length=500)
+    reply = models.CharField(max_length=500, null=True, blank=True)
+
+
+
 
