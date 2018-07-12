@@ -63,3 +63,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     def get_short_name(self):
         return self.name
 
+class Uploads(models.Model):
+    user = models.ForeignKey(User)
+    file = models.FileField()
+
+

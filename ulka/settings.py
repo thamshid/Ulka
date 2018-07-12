@@ -121,6 +121,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 AUTH_USER_MODEL = 'user_app.User'
-# GEOIP_PATH = '/home/thamshi/Downloads/GeoLiteCity.dat.gz'#os.path.join(BASE_DIR, 'GeoIPCountryCSV.zip')
+MEDIA_URL = '/media/'
+MEDIA_ROOT = 'media'
 import geoip_utils
 GEOIP_PATH = geoip_utils.where()

@@ -9,9 +9,9 @@ from django.shortcuts import render
 from django.utils.timezone import now
 from django.views import View
 
-from ulka.custom_mixin import AdminCheckMixin
-from user_app.forms import SignUpForm, LogInForm
-from user_app.models import User
+from ulka.custom_mixin import AdminCheckMixin, NormalUserCheckMixin
+from user_app.forms import SignUpForm, LogInForm, UploadForm
+from user_app.models import User, Uploads
 
 
 class HomeView(LoginRequiredMixin, View):
@@ -99,7 +99,7 @@ class LogInView(View):
             user.save()
             return HttpResponseRedirect('/')
 
-        return render(request, self.template_name, {'form': form})
+        return render(request, self.template_name, {'form': self.form_class})
 
 
 class UserListView(AdminCheckMixin, View):
@@ -111,9 +111,21 @@ class UserListView(AdminCheckMixin, View):
         return render(request, self.template_name, {'users': users})
 
 
-class DashboardView(LoginRequiredMixin, View):
-    login_url = '/login'
+class DashboardView(NormalUserCheckMixin, View):
+    login_url = '/'
     template_name = 'dashboard.html'
+    form_class = UploadForm
 
     def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, {'user': request.user})
+        files = Uploads.objects.filter(user=request.user)
+        return render(request, self.template_name, {'user': request.user, 'form': self.form_class, 'files': files})
+
+
+class UploadView(NormalUserCheckMixin, View):
+    form_class = UploadForm
+
+    def post(self, request, *args, **kwargs):
+        form = self.form_class(request.POST, request.FILES)
+        if form.is_valid():
+            Uploads.objects.create(user=request.user, file=form.files['file'])
+        return HttpResponseRedirect('/dashboard')

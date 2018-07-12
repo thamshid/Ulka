@@ -5,7 +5,18 @@
     <title>Ulka</title>
 </head>
 <body>
-<div><a href="/logout">Logout</a> </div>
+<div><a href="/logout">Logout</a></div>
 <div><img src="http://www.countryflags.io/{{ user.location }}/flat/64.png"></div>
+<form action="/upload" method="post" enctype="multipart/form-data">
+        {{ form }}
+    {% csrf_token %}
+    <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+    <input type="submit" value="Upload"/>
+    <div>{{ errors }}</div>
+
+</form>
+{% for file in files %}
+    <div><a href="/file-info/{{ file.id }}"><img src="{{ file.file.url }}" width="50px"> </a></div>
+{% endfor %}
 </body>
 </html>

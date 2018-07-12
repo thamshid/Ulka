@@ -10,3 +10,8 @@ class SignUpForm(forms.Form):
 class LogInForm(forms.Form):
     email = forms.EmailField(label='Email', max_length=250)
     password = forms.CharField(widget=forms.PasswordInput(), label='Password')
+
+
+
+class UploadForm(forms.Form):
+    file = forms.FileField()
