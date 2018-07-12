@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     invalid_attempts_count = models.IntegerField(default=0)
     location = models.CharField(max_length=25, null=True, blank=True)
     emails = models.ManyToManyField(Email)
-    primary_email = models.ForeignKey(Email, related_name='primary_email')
+    primary_email = models.ForeignKey(Email, related_name='primary_email', null=True)
 
 
     objects = AuthUserManager()
