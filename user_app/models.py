@@ -46,6 +46,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     last_invalid_attempt = models.DateTimeField(auto_now_add=True)
     invalid_attempts_count = models.IntegerField(default=0)
+    location = models.CharField(max_length=25, null=True, blank=True)
 
 
     objects = AuthUserManager()

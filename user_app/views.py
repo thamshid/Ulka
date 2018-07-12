@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.gis.geoip import GeoIP
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.utils.timezone import now
@@ -27,6 +28,14 @@ class SignUpView(View):
     template_name = 'sign_up.html'
     form_class = SignUpForm
 
+    def get_client_ip(self, request):
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        return ip
+
     def get(self, request, *args, **kwargs):
         if request.user.is_authenticated:
             return HttpResponseRedirect('/')
@@ -41,6 +50,9 @@ class SignUpView(View):
                 return render(request, self.template_name, {'form': self.form_class, 'errors': "Email Already Exist!"})
             user = User.objects.create(email=form.data['email'], name=form.data['name'])
             user.set_password(form.data['password'])
+            g = GeoIP()
+            ip = self.get_client_ip(request)
+            user.location = g.country(ip)['country_code']
             user.save()
             user = authenticate(email=form.data['email'], password=form.data['password'])
             login(request, user)
@@ -97,3 +109,11 @@ class UserListView(AdminCheckMixin, View):
     def get(self, request, *args, **kwargs):
         users = User.objects.filter(is_superuser=False)
         return render(request, self.template_name, {'users': users})
+
+
+class DashboardView(LoginRequiredMixin, View):
+    login_url = '/login'
+    template_name = 'dashboard.html'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name, {'user': request.user})
