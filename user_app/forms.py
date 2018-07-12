@@ -22,3 +22,7 @@ class ReplyForm(forms.Form):
 
 class CommendForm(forms.Form):
     commend = forms.CharField()
+
+
+class EmailForm(forms.Form):
+    email = forms.EmailField()

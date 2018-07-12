@@ -5,6 +5,8 @@ from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.db import models
 
+class Email(models.Model):
+    email = models.EmailField(max_length=500)
 
 class AuthUserManager(BaseUserManager):
     """
@@ -47,6 +49,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     last_invalid_attempt = models.DateTimeField(auto_now_add=True)
     invalid_attempts_count = models.IntegerField(default=0)
     location = models.CharField(max_length=25, null=True, blank=True)
+    emails = models.ManyToManyField(Email)
+    primary_email = models.ForeignKey(Email, related_name='primary_email')
 
 
     objects = AuthUserManager()
@@ -71,6 +75,8 @@ class Commend(models.Model):
     upload = models.ForeignKey(Uploads)
     comment = models.CharField(max_length=500)
     reply = models.CharField(max_length=500, null=True, blank=True)
+
+
 
 
 

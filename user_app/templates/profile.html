@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ulka</title>
+</head>
+<body>
+<div><a href="/logout">Logout</a></div>
+<div><img src="http://www.countryflags.io/{{ user.location }}/flat/64.png"></div>
+<div>Name: {{ user.name }}</div>
+<div>Primary Email: {{ user.primary_email.email }}</div>
+
+<div>Emails</div>
+{% for email in user.emails.all %}
+    <div>{{ email.email }}<a href="/set-primary/{{ email.id }}">Set Primary</a>
+    </div>
+{% endfor %}
+<form action="/email" method="post">
+    {{ email_form }}
+    {% csrf_token %}
+    <input type="hidden" name="csrfmiddlewaretoken" value="pHK2CZzBB323BM2Nq7DE2sxnQoBG1jPl" disabled="">
+    <input type="submit" value="Add Email"/>
+    {{ error }}
+
+
+</form>
+</body>
+</html>

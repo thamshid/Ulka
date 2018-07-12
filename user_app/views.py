@@ -10,8 +10,8 @@ from django.utils.timezone import now
 from django.views import View
 
 from ulka.custom_mixin import AdminCheckMixin, NormalUserCheckMixin
-from user_app.forms import SignUpForm, LogInForm, UploadForm, ReplyForm, CommendForm
-from user_app.models import User, Uploads, Commend
+from user_app.forms import SignUpForm, LogInForm, UploadForm, ReplyForm, CommendForm, EmailForm
+from user_app.models import User, Uploads, Commend, Email
 
 
 class HomeView(LoginRequiredMixin, View):
@@ -46,10 +46,12 @@ class SignUpView(View):
             return HttpResponseRedirect('/')
         form = self.form_class(request.POST)
         if form.is_valid():
-            if User.objects.filter(email=form.data['email']).exists():
+            if Email.objects.filter(email=form.data['email']).exists():
                 return render(request, self.template_name, {'form': self.form_class, 'errors': "Email Already Exist!"})
-            user = User.objects.create(email=form.data['email'], name=form.data['name'])
+            email = Email.objects.create(email=form.data['email'])
+            user = User.objects.create(email=form.data['email'], name=form.data['name'], primary_email=email)
             user.set_password(form.data['password'])
+            user.emails.add(email)
             g = GeoIP()
             ip = self.get_client_ip(request)
             user.location = g.country(ip)['country_code']
@@ -81,8 +83,10 @@ class LogInView(View):
             return HttpResponseRedirect('/')
         form = self.form_class(request.POST)
         if form.is_valid():
-            user = authenticate(email=form.data['email'], password=form.data['password'])
-            login_try = User.objects.filter(email=form.data['email']).last()
+            user = User.objects.filter(primary_email__email=form.data['email']).last()
+            if user and not user.check_password(form.data['password']):
+                user = None
+            login_try = User.objects.filter(primary_email__email=form.data['email']).last()
             if user is None:
                 if login_try:
                     login_try.invalid_attempts_count = login_try.invalid_attempts_count + 1
@@ -162,3 +166,44 @@ class CommendView(AdminCheckMixin, View):
         if form.is_valid():
             Commend.objects.create(comment=form.data['commend'], upload=upload)
         return HttpResponseRedirect('/user-info/' + str(upload.user.id))
+
+
+class ProfileView(NormalUserCheckMixin, View):
+    template_name = 'profile.html'
+    form_class = EmailForm
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name,
+                      {'user': request.user, 'email_form': self.form_class})
+
+
+class EmailView(NormalUserCheckMixin, View):
+    template_name = 'profile.html'
+    form_class = EmailForm
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        form = self.form_class(request.POST)
+        if Email.objects.filter(email=form.data['email']).exists():
+            return render(request, self.template_name,
+                          {'user': request.user, 'email_form': self.form_class, 'error': "Email already exist!"})
+        if form.is_valid():
+            email = Email.objects.create(email=form.data['email'])
+            user.emails.add(email)
+            email.save()
+            user.save()
+        return render(request, self.template_name,
+                      {'user': request.user, 'email_form': self.form_class})
+
+
+class PrimaryView(NormalUserCheckMixin, View):
+    template_name = 'profile.html'
+    form_class = EmailForm
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        email = user.emails.get(id=kwargs['pk'])
+        user.primary_email = email
+        user.save()
+        return render(request, self.template_name,
+                      {'user': request.user, 'email_form': self.form_class})
